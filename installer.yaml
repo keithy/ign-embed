@@ -1,0 +1,21 @@
+variant: fcos
+version: 1.0.0
+passwd:
+  users:
+  - name: core
+    password_hash: $6$rounds=656000$nyB0RnGVPUh8cbV8$dkm1fotrOfii/8IgqJNhMfmKcNkUQfPoJh8lcojWtP8zpTmnRAL9gVfq/Jl7ws1sK1KXaUSua3E6YhnKvV5b/0
+systemd:
+  units:
+  - name: installation.service
+    enabled: true
+    contents: |
+      [Unit]
+      Description=Install using ignition file on USB Key
+      After=multi-user.target
+      [Service]
+      Type=oneshot
+      ExecStartPre=mount /dev/sdb1 /srv
+      ExecStart=/usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json
+      [Install]
+      WantedBy=multi-user.target
+

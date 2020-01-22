@@ -1,0 +1,34 @@
+
+{
+  "ignition": {
+    "config": {
+      "replace": {
+        "source": null,
+        "verification": {}
+      }
+    },
+    "security": {
+      "tls": {}
+    },
+    "timeouts": {},
+    "version": "3.0.0"
+  },
+  "passwd": {
+    "users": [
+      {
+        "name": "core",
+        "passwordHash": "$6$rounds=656000$nyB0RnGVPUh8cbV8$dkm1fotrOfii/8IgqJNhMfmKcNkUQfPoJh8lcojWtP8zpTmnRAL9gVfq/Jl7ws1sK1KXaUSua3E6YhnKvV5b/0"
+      }
+    ]
+  },
+  "storage": {},
+  "systemd": {
+    "units": [
+      {
+        "contents": "[Unit]\nDescription=Install using ignition file on USB Key\nAfter=multi-user.target\n[Service]\nType=oneshot\nExecStartPre=mount /dev/sdb1 /srv\nExecStart=/usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "installation.service"
+      }
+    ]
+  }
+}
