@@ -25,7 +25,7 @@
   "systemd": {
     "units": [
       {
-        "contents": "[Unit]\nDescription=Install using ignition file on USB Key\nAfter=multi-user.target\n[Service]\nType=oneshot\nExecStartPre=mount /dev/sdb1 /srv\nExecStart=/usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nDescription=Install using ignition file on USB Key\nAfter=multi-user.target\n[Service]\nType=oneshot\nExecStartPre=mount /dev/sdb1 /srv\nExecStart=/bin/sh -c '[[ -f /srv/script ]] \u0026\u0026 /srv/script || /usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json\nExecStart=mount /dev/sda1 /mnt\nExecStart=-cp /srv/ignition.yaml /mnt/ignition/config.yaml\nExecStartPost=echo \"Completed\"\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "installation.service"
       }
