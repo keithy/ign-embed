@@ -1,0 +1,65 @@
+{
+  "ignition": {
+    "config": {
+      "replace": {
+        "source": null,
+        "verification": {}
+      }
+    },
+    "security": {
+      "tls": {}
+    },
+    "timeouts": {},
+    "version": "3.0.0"
+  },
+  "passwd": {
+    "groups": [
+      {
+        "name": "cockpit"
+      }
+    ],
+    "users": [
+      {
+        "groups": [
+          "wheel",
+          "cockpit"
+        ],
+        "name": "core",
+        "passwordHash": "$6$rounds=656000$aTWXzC/xlpnVBnxu$QzEvfahXJWRXTVveEMD3QY1OTjWZ3o8WOa1huZq2BBEvtfyMQSwsSpTyaicAW3A7akhFk7qXCIAaKrrWT64xD."
+      }
+    ]
+  },
+  "storage": {
+    "files": [
+      {
+        "group": {},
+        "path": "/etc/ssh/sshd_config.d/cockpit_enable_password_access",
+        "user": {},
+        "contents": {
+          "source": "data:,%23%20Added%20for%20cockpit%0AMatch%20Group%20cockpit%0A%20%20%20%20PasswordAuthentication%20yes%0A",
+          "verification": {}
+        },
+        "mode": 420
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "contents": "[Unit]\nDescription=Install-Enable-Start Cockpit Service Unit\nRequires=boot-complete.target\nAfter=boot-complete.target\nConditionPathExists=!/etc/systemd/system/cockpit.service \n[Service]\nType=oneshot\nExecStart=podman container runlabel INSTALL cockpit/ws cockpit/ws\nExecStart=systemctl enable cockpit.service\nExecStartPost=systemctl start cockpit.service\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "install-cockpit-service.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Compose sshd_config\nConditionFirstBoot=yes\nAfter=network.target\nBefore=sshd.service\n[Service]\nType=oneshot\nExecStart=-sh -c 'find /etc/ssh/sshd_config.d -type f -exec cat {} + \u003e\u003e /etc/ssh/sshd_config'\n[Install]\nRequiredBy=sshd.service\n",
+        "enabled": true,
+        "name": "sshd-config-dropins.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Download \u0026 Ready Overlayed Packages\nConditionFirstBoot=yes\nBefore=boot-complete.target\n[Service]\nType=oneshot\nExecStart=rpm-ostree install htop nano cockpit-system cockpit-ostree cockpit-podman cockpit-networkmanager cockpit-docker\n# reboot OR rpm-ostree ex livefs --i-like-danger\nExecStart=rpm-ostree ex livefs --i-like-danger\n[Install]\nRequiredBy=boot-complete.target\n",
+        "enabled": true,
+        "name": "rpm-ostree-install-overlays.service"
+      }
+    ]
+  }
+}

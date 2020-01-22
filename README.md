@@ -2,10 +2,17 @@
 
 This adds `installation.service` an automated installation unit to the FCOS ISO file found on the USB Key
 
+(login as core/fcos)
+
 ```
-# Transpile embed.yaml to embed.json 
+# Transpile installer.yaml to installer.json 
 make 
 
-# Embed in ISO file mounted at /srv
+# Embed installer.json in ISO file in parent directory
 make embed
+```
+
+To monitor the installations which occur on first boot:
+```
+watch -n 2 sudo systemctl list-jobs
 ```

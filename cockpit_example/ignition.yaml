@@ -1,0 +1,55 @@
+variant: fcos
+version: 1.0.0
+passwd:
+  groups:
+  - name: cockpit
+  users:
+  - name: core
+    password_hash: $6$rounds=656000$aTWXzC/xlpnVBnxu$QzEvfahXJWRXTVveEMD3QY1OTjWZ3o8WOa1huZq2BBEvtfyMQSwsSpTyaicAW3A7akhFk7qXCIAaKrrWT64xD.
+    groups:
+    - wheel
+    - cockpit
+systemd:
+  units:
+  - name: install-cockpit-service.service
+    enabled: true
+    contents: "[Unit]\nDescription=Install-Enable-Start Cockpit Service Unit\nRequires=boot-complete.target\nAfter=boot-complete.target\nConditionPathExists=!/etc/systemd/system/cockpit.service
+      \n[Service]\nType=oneshot\nExecStart=podman container runlabel INSTALL cockpit/ws
+      cockpit/ws\nExecStart=systemctl enable cockpit.service\nExecStartPost=systemctl
+      start cockpit.service\n[Install]\nWantedBy=multi-user.target\n"
+  - name: sshd-config-dropins.service
+    enabled: true
+    contents: |
+      [Unit]
+      Description=Compose sshd_config
+      ConditionFirstBoot=yes
+      After=network.target
+      Before=sshd.service
+      [Service]
+      Type=oneshot
+      ExecStart=-sh -c 'find /etc/ssh/sshd_config.d -type f -exec cat {} + >> /etc/ssh/sshd_config'
+      [Install]
+      RequiredBy=sshd.service
+  - name: rpm-ostree-install-overlays.service
+    enabled: true
+    contents: |
+      [Unit]
+      Description=Download & Ready Overlayed Packages
+      ConditionFirstBoot=yes
+      Before=boot-complete.target
+      [Service]
+      Type=oneshot
+      ExecStart=rpm-ostree install htop nano cockpit-system cockpit-ostree cockpit-podman cockpit-networkmanager cockpit-docker
+      # reboot OR rpm-ostree ex livefs --i-like-danger
+      ExecStart=rpm-ostree ex livefs --i-like-danger
+      [Install]
+      RequiredBy=boot-complete.target
+storage:
+  files:
+  - path: /etc/ssh/sshd_config.d/cockpit_enable_password_access
+    mode: 420
+    contents:
+      inline: |
+        # Added for cockpit
+        Match Group cockpit
+            PasswordAuthentication yes
