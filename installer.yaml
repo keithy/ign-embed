@@ -15,7 +15,7 @@ systemd:
       [Service]
       Type=oneshot
       ExecStartPre=mount /dev/sdb1 /srv
-      ExecStart=/bin/sh -c '[[ -f /srv/script ]] && /srv/script || /usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json
+      ExecStart=/bin/sh -c '[[ -f /srv/script ]] && /srv/script || /usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json'
       ExecStart=mount /dev/sda1 /mnt
       # For User Reference
       ExecStart=-cp /srv/ignition.yaml /mnt/ignition/config.yaml
