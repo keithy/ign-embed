@@ -1,0 +1,3 @@
+echo "Starting Script"
+/usr/bin/coreos-installer install /dev/sda --image-file /srv/*.raw.xz -i /srv/ignition.json --insecure
+echo "Script Complete"
