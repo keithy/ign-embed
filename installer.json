@@ -25,7 +25,25 @@
   "systemd": {
     "units": [
       {
-        "contents": "[Unit]\nDescription=Install using ignition file on USB Key\nAfter=multi-user.target\n[Service]\nType=oneshot\nExecStartPre=mount /dev/sdb1 /srv\nExecStart=/bin/sh -c '[[ -f /srv/script ]] \u0026\u0026 /srv/script || /usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json'\nExecStart=mount /dev/sda1 /mnt\n# For User Reference\nExecStart=-cp /srv/ignition.yaml /mnt/ignition/config.yaml\nExecStartPost=echo \"Completed\"\n[Install]\nWantedBy=multi-user.target\n",
+        "dropins": [
+          {
+            "contents": "[Service]\n# Override Execstart in main unit\nExecStart=\n# Add new Execstart with `-` prefix to ignore failure\nExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM\nTTYVTDisallocate=no\n",
+            "name": "autologin-core.conf"
+          }
+        ],
+        "name": "serial-getty@ttyS0.service"
+      },
+      {
+        "dropins": [
+          {
+            "contents": "[Service]\n# Override Execstart in main unit\nExecStart=\n# Add new Execstart with `-` prefix to ignore failure\nExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM\nTTYVTDisallocate=no       \n",
+            "name": "autologin-core.conf"
+          }
+        ],
+        "name": "getty@tty1.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Install using ignition file on USB Key\nAfter=multi-user.target\n[Service]\nType=oneshot\nExecStartPre=-mount /dev/sdb1 /srv\nExecStartPre=-mount /dev/sdc1 /srv\nExecStartPre=-mount /dev/sdd1 /srv\nExecStart=/bin/sh -c '[[ -f /srv/script ]] \u0026\u0026 /srv/script || /usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json'\nExecStart=mount /dev/sda1 /mnt\n# For User Reference\nExecStart=-cp /srv/ignition.yaml /mnt/ignition/config.yaml\nExecStartPost=echo \"Completed\"\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "installation.service"
       }

@@ -6,6 +6,26 @@ passwd:
     password_hash: $6$rounds=656000$nyB0RnGVPUh8cbV8$dkm1fotrOfii/8IgqJNhMfmKcNkUQfPoJh8lcojWtP8zpTmnRAL9gVfq/Jl7ws1sK1KXaUSua3E6YhnKvV5b/0
 systemd:
   units:
+  - name: serial-getty@ttyS0.service
+    dropins:
+      - name: autologin-core.conf
+        contents: |
+          [Service]
+          # Override Execstart in main unit
+          ExecStart=
+          # Add new Execstart with `-` prefix to ignore failure
+          ExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM
+          TTYVTDisallocate=no
+  - name: getty@tty1.service
+    dropins:
+      - name: autologin-core.conf
+        contents: |
+          [Service]
+          # Override Execstart in main unit
+          ExecStart=
+          # Add new Execstart with `-` prefix to ignore failure
+          ExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM
+          TTYVTDisallocate=no       
   - name: installation.service
     enabled: true
     contents: |
@@ -14,7 +34,9 @@ systemd:
       After=multi-user.target
       [Service]
       Type=oneshot
-      ExecStartPre=mount /dev/sdb1 /srv
+      ExecStartPre=-mount /dev/sdb1 /srv
+      ExecStartPre=-mount /dev/sdc1 /srv
+      ExecStartPre=-mount /dev/sdd1 /srv
       ExecStart=/bin/sh -c '[[ -f /srv/script ]] && /srv/script || /usr/bin/coreos-installer install /dev/sda -i /srv/ignition.json'
       ExecStart=mount /dev/sda1 /mnt
       # For User Reference
